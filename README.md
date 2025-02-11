@@ -1,3 +1,7 @@
+# FastAPI Book Project
+
+This is a test update to trigger the CI workflow.
+
 # FastAPI Book Management API
 
 ## Overview
