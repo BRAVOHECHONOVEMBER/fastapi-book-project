@@ -1,6 +1,8 @@
 from typing import OrderedDict, Optional
+
 from fastapi import APIRouter, status, HTTPException
 from fastapi.responses import JSONResponse
+
 from api.db.schemas import Book, Genre, InMemoryDB
 
 router = APIRouter()
@@ -39,14 +41,11 @@ async def create_book(book: Book):
     )
 
 
-@router.get(
-    "/", response_model=OrderedDict[int, Book], status_code=status.HTTP_200_OK
-)
+@router.get("/", response_model=OrderedDict[int, Book], status_code=status.HTTP_200_OK)
 async def get_books() -> OrderedDict[int, Book]:
     return db.get_books()
 
 
-# ✅ ADD THIS FUNCTION TO FIX THE GET BOOK BY ID ERROR
 @router.get("/{book_id}", response_model=Book, status_code=status.HTTP_200_OK)
 async def get_book(book_id: int) -> Optional[Book]:
     """
