@@ -6,7 +6,7 @@ on:
       - test-ci
   pull_request:
     branches:
-      - main
+      - test-ci
     paths-ignore:
       - '.github/workflows/**'
 
