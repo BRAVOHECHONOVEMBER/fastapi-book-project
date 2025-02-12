@@ -13,40 +13,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Step 2: Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: '3.12'
 
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # Step 4: Run Tests
       - name: Run Tests
         run: |
           pytest
 
+      # Step 5: Build Docker Image
       - name: Build Docker Image
         run: |
           docker build -t fastapi-app:latest .
 
-      - name: Tag Docker Image
-        run: |
-          docker tag fastapi-app:latest ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-app:latest
+      # Step 6: Log in to DockerHub
+      - name: Log in to DockerHub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
+      # Step 7: Tag and Push Docker Image to Docker Hub
       - name: Push Docker Image to Docker Hub
         run: |
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+          docker tag fastapi-app:latest ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-app:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-app:latest
 
+      # Step 8: Deploy to Server via SSH
       - name: Deploy to Server
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-app:latest &&
-            docker-compose down &&
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fastapi-app:latest
+            docker-compose down
             docker-compose up -d
-          "
