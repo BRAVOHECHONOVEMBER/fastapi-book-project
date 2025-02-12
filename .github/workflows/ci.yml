@@ -1,56 +1,30 @@
-name: CI/CD Pipeline
+name: CI Pipeline
 
 on:
   pull_request:
     branches:
       - main
-
-  
-  workflow_run:
-    workflows: ["CI/CD Pipeline"]
-    types:
-      - completed
+    paths-ignore:
+      - '.github/workflows/**'
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.12"
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Run tests
-        run: pytest
-
-  deploy:
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
+          
+      - name: Run Tests
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Deploy to Production
-        run: |
-          echo "Deploying to production..."
+          pytest
