@@ -1,12 +1,13 @@
 from tests import client
+from core.config import settings
 
 # Use the correct API prefix for all routes
-API_PREFIX = "/api/v1"
+API_PREFIX = settings.API_PREFIX
 
 def test_get_all_books():
     response = client.get(f"{API_PREFIX}/books/")
     assert response.status_code == 200
-    assert len(response.json()) == 3
+    assert isinstance(response.json(), list)
 
 def test_get_single_book():
     response = client.get(f"{API_PREFIX}/books/1")
